@@ -132,16 +132,17 @@ class ChunkTypes(Enum):
     @staticmethod
     def from_binary(data):
         if len(data) != ChunkField.TYPE.length():
-            raise Exception('Incorrect a chunk type size {}!'.format(len(data)))
+            raise Exception(f'Incorrect a chunk type size {len(data)}!')
 
         chunk_type = data.decode('ascii')
-        found_enums = [enum for name, enum in ChunkTypes.__members__.items()
-                       if name == chunk_type]
-
-        if len(found_enums) == 0:
-            raise Exception('Unknown "{}" chunk type!'.format(chunk_type))
-
-        return found_enums[0]
+        if found_enums := [
+            enum
+            for name, enum in ChunkTypes.__members__.items()
+            if name == chunk_type
+        ]:
+            return found_enums[0]
+        else:
+            raise Exception(f'Unknown "{chunk_type}" chunk type!')
 
     @staticmethod
     def is_text_chunk(chunk_type):
@@ -237,12 +238,12 @@ parser.add_argument('file', help='an PNG image')
 filename = parser.parse_args().file
 
 if not os.path.isfile(filename):
-    print_error_and_exit('"{}" file not found!'.format(filename))
+    print_error_and_exit(f'"{filename}" file not found!')
 
 with open(filename, 'br') as f:
     # check file header
     if f.read(PNG_MAGIC_NUMBER_LENGTH) != PNG_MAGIC_NUMBER:
-        print_error_and_exit('"{}" file is not an PNG image!'.format(filename))
+        print_error_and_exit(f'"{filename}" file is not an PNG image!')
 
     # load the picture to memory
     mm = mmap(f.fileno(), 0, access=ACCESS_READ)
